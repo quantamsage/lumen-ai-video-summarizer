@@ -131,6 +131,14 @@ func (s *Store) UpdateVideoMetadata(ctx context.Context, v *model.Video) error {
 	return err
 }
 
+// SetVideoFile records the stored media file for a video.
+func (s *Store) SetVideoFile(ctx context.Context, videoID int64, key string, size int64, mime string) error {
+	_, err := s.DB.ExecContext(ctx,
+		`UPDATE videos SET storage_key = ?, size_bytes = ?, mime_type = ?, updated_at = ? WHERE id = ?`,
+		key, size, mime, now(), videoID)
+	return err
+}
+
 // SetVideoStatus updates the pipeline status and error message.
 func (s *Store) SetVideoStatus(ctx context.Context, videoID int64, status, errMsg string) error {
 	_, err := s.DB.ExecContext(ctx,

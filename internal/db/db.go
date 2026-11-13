@@ -34,6 +34,9 @@ func Open(path string) (*sql.DB, error) {
 	q.Add("_pragma", "journal_mode(WAL)")
 	q.Add("_pragma", "synchronous(NORMAL)")
 	q.Add("_txlock", "immediate")
+	// Store times as sortable "YYYY-MM-DD HH:MM:SS.SSS+00:00" strings that
+	// compare correctly against CURRENT_TIMESTAMP.
+	q.Add("_time_format", "sqlite")
 	dsn := "file:" + filepath.ToSlash(path) + "?" + q.Encode()
 
 	conn, err := sql.Open("sqlite", dsn)

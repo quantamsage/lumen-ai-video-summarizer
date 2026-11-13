@@ -9,6 +9,22 @@ Lumen is a Go web application that turns educational videos into structured lear
 
 It is a server-rendered application: Go `net/http` and `html/template`, plain CSS, and a small amount of vanilla JavaScript for progressive enhancement. There are no frontend frameworks and no build step.
 
+![Video page with player, summary and timestamped topic breakdown](docs/screenshots/video-summary.png)
+
+## Screenshots
+
+The screenshots below use a demo account with sample content.
+
+| | |
+|---|---|
+| **Dashboard.** Learning stats, recent videos and quiz scores.<br>![Dashboard](docs/screenshots/dashboard.png) | **Video library.** Search, status filter, sorting and per-stage status badges.<br>![Video library](docs/screenshots/library.png) |
+| **Add a video.** Upload with a progress bar, or import from a URL, with an optional caption file.<br>![Add a video](docs/screenshots/add-video.png) | **Background processing.** Live stage and progress updates; you can leave the page.<br>![Processing](docs/screenshots/video-processing.png) |
+| **Transcript.** Search, timestamps that seek the player, copy and download.<br>![Transcript](docs/screenshots/video-transcript.png) | **Taking a quiz.** One question at a time, with progress and navigation.<br>![Quiz](docs/screenshots/quiz.png) |
+| **Quiz results.** Score, correct answers, why each option is right or wrong, and links to the moment in the video.<br>![Results](docs/screenshots/results.png) | **Learning history.** Every completed quiz, ready to review or retake.<br>![History](docs/screenshots/history.png) |
+| **Dark theme.** Follows the system setting, with a manual toggle.<br>![Dark mode](docs/screenshots/dark-mode.png) | **Landing page.**<br>![Landing page](docs/screenshots/home.png) |
+
+<p align="center"><img src="docs/screenshots/mobile.png" alt="Video page on a phone" width="300"><br><em>Responsive layout on a phone</em></p>
+
 ## Features
 
 - **Accounts:** registration, login and logout, password reset by email, profile and password management, and account deletion. Sessions are secure, with sliding expiry.

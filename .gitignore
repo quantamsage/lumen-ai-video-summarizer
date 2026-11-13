@@ -1,0 +1,13 @@
+# Local configuration and runtime data
+.env
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Build output
+/bin/
+*.exe
+*.test
+*.out
+coverage.*

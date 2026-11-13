@@ -2,7 +2,10 @@ module github.com/quantamsage/ai-video-summarizer
 
 go 1.26.0
 
-require modernc.org/sqlite v1.62.0
+require (
+	golang.org/x/crypto v0.59.0
+	modernc.org/sqlite v1.62.0
+)
 
 require (
 	github.com/dustin/go-humanize v1.1.0 // indirect

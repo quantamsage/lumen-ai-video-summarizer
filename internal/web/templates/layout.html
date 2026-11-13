@@ -1,0 +1,81 @@
+{{define "head"}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="{{.CSRFToken}}">
+<meta name="color-scheme" content="light dark">
+<title>{{.Title}} · Lumen</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/css/app.css">
+<script src="/static/js/theme.js"></script>
+<script src="/static/js/app.js" defer></script>
+{{end}}
+
+{{define "app"}}<!doctype html>
+<html lang="en">
+<head>{{template "head" .}}</head>
+<body>
+<a class="skip-link" href="#content">Skip to content</a>
+<div class="shell">
+  <aside class="sidebar" aria-label="Main navigation">
+    <a class="brand" href="/dashboard">{{template "logo"}} Lumen</a>
+    <nav class="nav">
+      <a href="/dashboard" {{if eq .Nav "dashboard"}}aria-current="page"{{end}}>{{template "icon-home"}} Dashboard</a>
+      <a href="/videos" {{if eq .Nav "library"}}aria-current="page"{{end}}>{{template "icon-library"}} Video library</a>
+      <a href="/videos/new" {{if eq .Nav "new"}}aria-current="page"{{end}}>{{template "icon-plus"}} Add video</a>
+      <a href="/history" {{if eq .Nav "history"}}aria-current="page"{{end}}>{{template "icon-chart"}} Learning history</a>
+      <div class="nav-section">Account</div>
+      <a href="/settings" {{if eq .Nav "settings"}}aria-current="page"{{end}}>{{template "icon-settings"}} Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      {{with .User}}
+      <div class="user-chip">
+        <span class="avatar" aria-hidden="true">{{initial .DisplayName}}</span>
+        <div class="grow">
+          <div class="name">{{.DisplayName}}</div>
+          <div class="email">{{.Email}}</div>
+        </div>
+      </div>
+      {{end}}
+      <div class="sidebar-actions">
+        <button type="button" class="btn btn-ghost btn-sm" data-theme-toggle aria-label="Toggle dark mode">{{template "icon-moon"}} Theme</button>
+        <form method="post" action="/logout" class="inline-form">
+          <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+          <button type="submit" class="btn btn-ghost btn-sm">{{template "icon-logout"}} Sign out</button>
+        </form>
+      </div>
+    </div>
+  </aside>
+  <div class="scrim"></div>
+  <div class="main">
+    <header class="topbar">
+      <button type="button" class="btn btn-ghost btn-sm" data-nav-toggle aria-expanded="false" aria-label="Open navigation">{{template "icon-menu"}}</button>
+      <a class="brand" href="/dashboard">{{template "logo"}} Lumen</a>
+      <a class="btn btn-sm" href="/videos/new">{{template "icon-plus"}}<span class="sr-only">Add video</span></a>
+    </header>
+    <main class="content" id="content">
+      {{template "flash" .}}
+      {{template "content" .}}
+    </main>
+  </div>
+</div>
+</body>
+</html>{{end}}
+
+{{define "auth"}}<!doctype html>
+<html lang="en">
+<head>{{template "head" .}}</head>
+<body>
+<main class="auth-page" id="content">
+  <div class="auth-card">
+    <a class="brand" href="/">{{template "logo"}} Lumen</a>
+    <div class="card">
+      {{template "flash" .}}
+      {{template "content" .}}
+    </div>
+    {{template "auth-footer" .}}
+  </div>
+</main>
+</body>
+</html>{{end}}
+
+{{define "auth-footer"}}{{end}}

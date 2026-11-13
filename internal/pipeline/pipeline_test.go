@@ -43,7 +43,9 @@ func (f *fakeMedia) Probe(context.Context, string) (*media.Metadata, error) {
 	}
 	return f.meta, nil
 }
-func (f *fakeMedia) ExtractSubtitles(context.Context, string, int) ([]byte, error) { return f.subs, nil }
+func (f *fakeMedia) ExtractSubtitles(context.Context, string, int) ([]byte, error) {
+	return f.subs, nil
+}
 func (f *fakeMedia) ExtractAudio(_ context.Context, _ string, dir string, seg int) ([]media.AudioChunk, error) {
 	var out []media.AudioChunk
 	for i := 0; i < 2; i++ {

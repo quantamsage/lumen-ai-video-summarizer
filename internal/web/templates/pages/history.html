@@ -1,0 +1,37 @@
+{{template "app" .}}
+{{define "content"}}
+<div class="page-header">
+  <div>
+    <h1>Learning history</h1>
+    <p>Every quiz you've completed, newest first.</p>
+  </div>
+</div>
+{{if .Data.Attempts}}
+<div class="card card-flush">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Video</th><th>Quiz</th><th>Difficulty</th><th>Score</th><th>Completed</th><th><span class="sr-only">Actions</span></th></tr></thead>
+      <tbody>
+        {{range .Data.Attempts}}
+        <tr>
+          <td><a href="/videos/{{.VideoID}}">{{.VideoTitle}}</a></td>
+          <td>{{.QuizTitle}}</td>
+          <td><span class="badge plain badge-{{.Difficulty}}">{{title .Difficulty}}</span></td>
+          <td><span class="score-pill score-{{scoreClass .Score}}">{{pct .Score}}</span> <span class="small muted nowrap">{{.CorrectCount}}/{{.TotalCount}}</span></td>
+          <td class="nowrap">{{datetime .CompletedAt}}</td>
+          <td class="nowrap"><a href="/attempts/{{.ID}}">Review</a> · <a href="/quizzes/{{.QuizID}}">Retake</a></td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+</div>
+{{else}}
+<div class="card"><div class="empty">
+  {{template "icon-chart"}}
+  <h3>No quiz results yet</h3>
+  <p>Open a processed video and take its quiz. Your results and explanations will be saved here.</p>
+  <a class="btn" href="/videos">Go to library</a>
+</div></div>
+{{end}}
+{{end}}

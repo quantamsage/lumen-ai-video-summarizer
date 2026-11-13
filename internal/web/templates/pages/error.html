@@ -1,0 +1,11 @@
+{{if .User}}{{template "app" .}}{{else}}{{template "auth" .}}{{end}}
+{{define "content"}}
+<div class="empty">
+  {{template "icon-alert"}}
+  <h2>{{.Data.Status}} · {{.Title}}</h2>
+  <p>{{.Data.Message}}</p>
+  <div class="row">
+    {{if .User}}<a class="btn" href="/dashboard">Go to dashboard</a>{{else}}<a class="btn" href="/">Go home</a>{{end}}
+  </div>
+</div>
+{{end}}

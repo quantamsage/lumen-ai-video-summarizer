@@ -1,0 +1,83 @@
+{{template "app" .}}
+{{define "content"}}
+{{$a := .Data.Attempt}}
+{{$q := .Data.Quiz}}
+{{$v := .Data.Video}}
+<div class="quiz-shell">
+  <div class="page-header">
+    <div>
+      <div class="breadcrumb"><a href="/videos/{{$v.ID}}">{{$v.Title}}</a> / <a href="/quizzes/{{$q.ID}}">Quiz</a> / Results</div>
+      <h1>Quiz results</h1>
+      <p>{{$q.Title}} · completed {{with $a.CompletedAt}}{{datetime .}}{{end}}</p>
+    </div>
+  </div>
+
+  <section class="card" aria-labelledby="score-h">
+    <div class="score-hero">
+      <div class="score-ring {{scoreClass $a.Score}}" data-score="{{$a.Score}}" role="img" aria-label="Score {{pct $a.Score}}">
+        <div>{{pct $a.Score}}</div>
+      </div>
+      <div>
+        <h2 id="score-h">{{if ge $a.Score 80.0}}Excellent work!{{else if ge $a.Score 50.0}}Good effort, keep going.{{else}}Worth another look at the video.{{end}}</h2>
+        <div class="row">
+          <span class="badge badge-ready plain">{{$a.CorrectCount}} correct</span>
+          <span class="badge badge-failed plain">{{.Data.Incorrect}} incorrect</span>
+          <span class="badge plain">Score {{$a.CorrectCount}} / {{$a.TotalCount}}</span>
+          {{if .Data.Duration}}<span class="badge plain">Time {{.Data.Duration}}</span>{{end}}
+        </div>
+        <div class="row">
+          <a class="btn" href="/quizzes/{{$q.ID}}">Retake quiz</a>
+          <a class="btn btn-secondary" href="/videos/{{$v.ID}}">Back to video</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="sr-only">Answers</h2>
+  <div class="stack">
+  {{range .Data.Rows}}
+  {{$ans := .Answer}}
+  <article class="result {{if $ans.IsCorrect}}correct{{else}}incorrect{{end}}">
+    <div class="q-head">
+      <span>Question {{.Number}} · {{typeLabel .Question.Type}}</span>
+      <span>{{if $ans.IsCorrect}}<span class="badge badge-ready">Correct</span>{{else if .Answered}}<span class="badge badge-failed">Incorrect</span>{{else}}<span class="badge badge-pending">Not answered</span>{{end}}</span>
+    </div>
+    <p class="q-prompt">{{.Question.Prompt}}</p>
+
+    {{if eq .Question.Type "short_answer"}}
+      <div class="result-option {{if $ans.IsCorrect}}is-correct{{else if .Answered}}picked-wrong{{end}}">
+        <span class="icon">{{if $ans.IsCorrect}}✓{{else}}✗{{end}}</span>
+        <span>Your answer: {{if $ans.TextAnswer}}<strong>{{$ans.TextAnswer}}</strong>{{else}}<em>no answer</em>{{end}}
+          {{if $ans.Feedback}}<span class="why">{{$ans.Feedback}}</span>{{end}}
+          {{if eq $ans.GradingMethod "ai"}}<span class="why">Checked for meaning against the answer key.</span>{{end}}
+        </span>
+      </div>
+      <div class="result-option is-correct">
+        <span class="icon">✓</span>
+        <span>Expected answer: <strong>{{index .Question.AcceptedAnswers 0}}</strong>
+          {{if gt (len .Question.AcceptedAnswers) 1}}<span class="why">Also accepted: {{range $i, $x := .Question.AcceptedAnswers}}{{if $i}}{{if gt $i 1}}, {{end}}{{$x}}{{end}}{{end}}</span>{{end}}
+        </span>
+      </div>
+    {{else}}
+      {{range .Question.Options}}
+      {{$picked := containsID $ans.SelectedOptions .ID}}
+      <div class="result-option {{if .IsCorrect}}is-correct{{else if $picked}}picked-wrong{{end}}">
+        <span class="icon">{{if .IsCorrect}}✓{{else if $picked}}✗{{end}}</span>
+        <span>{{.Text}}{{if $picked}} <span class="small muted">(your answer)</span>{{end}}
+          {{if .Explanation}}<span class="why">{{.Explanation}}</span>{{end}}
+        </span>
+      </div>
+      {{end}}
+    {{end}}
+
+    <div class="explanation">
+      <strong>Explanation.</strong> {{.Question.Explanation}}
+      {{if .Question.Timestamp}}
+        <div>See it in the video: <a class="ts" href="/videos/{{$v.ID}}?t={{printf "%.0f" (deref .Question.Timestamp)}}#player">{{clock (deref .Question.Timestamp)}}</a>{{if .Question.SectionTitle}} · {{.Question.SectionTitle}}{{end}}</div>
+      {{else if .Question.SectionTitle}}<div>Section: {{.Question.SectionTitle}}</div>{{end}}
+    </div>
+  </article>
+  {{end}}
+  </div>
+</div>
+{{end}}

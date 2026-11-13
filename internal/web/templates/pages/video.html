@@ -1,0 +1,258 @@
+{{template "app" .}}
+{{define "content"}}
+{{$d := .Data}}
+{{$v := $d.Video}}
+{{$timed := and $d.Transcript $d.Transcript.HasTimestamps}}
+<div class="page-header">
+  <div class="grow">
+    <div class="breadcrumb"><a href="/videos">Library</a> / Video</div>
+    <h1>{{$v.Title}}</h1>
+    <div class="status-row">
+      {{template "status-badge" $v.Status}}
+      <span class="badge badge-{{$v.SummaryStatus}}">Summary: {{statusLabel $v.SummaryStatus}}</span>
+      <span class="badge badge-{{$v.QuizStatus}}">Quiz: {{statusLabel $v.QuizStatus}}</span>
+    </div>
+  </div>
+  <div class="row">
+    {{if $d.Summary}}<a class="btn btn-secondary btn-sm" href="/videos/{{$v.ID}}/summary.md">{{template "icon-download"}} Summary</a>{{end}}
+    <form method="post" action="/videos/{{$v.ID}}/delete" class="inline-form"
+          data-confirm="Delete this video and all of its transcripts, summaries, quizzes and results? This cannot be undone.">
+      {{template "csrf" $.CSRFToken}}
+      <button class="btn btn-ghost btn-sm" type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+
+{{if or (eq $v.Status "queued") (eq $v.Status "processing")}}
+<div class="card processing-card" data-poll-url="/videos/{{$v.ID}}/status" data-initial="{{$v.Status}}/{{$v.SummaryStatus}}/{{$v.QuizStatus}}" aria-live="polite">
+  <div class="row"><span class="spinner" aria-hidden="true"></span><strong>Processing your video</strong></div>
+  <div class="progress-panel">
+    <div class="progress-meta"><span data-stage>{{with $d.Job}}{{if .Stage}}{{.Stage}}{{else}}Waiting in queue…{{end}}{{else}}Waiting in queue…{{end}}</span><span data-percent>{{with $d.Job}}{{.Progress}}{{else}}0{{end}}%</span></div>
+    <progress max="100" value="{{with $d.Job}}{{.Progress}}{{else}}0{{end}}"></progress>
+    <p class="small muted">This can take a few minutes for long videos. You can leave this page; results will be here when you come back.</p>
+  </div>
+</div>
+{{else if eq $v.Status "failed"}}
+<div class="card error-card">
+  <div class="row-between">
+    <div class="row">{{template "icon-alert"}}<strong>Processing failed</strong></div>
+    <form method="post" action="/videos/{{$v.ID}}/reprocess" class="inline-form" data-once>
+      {{template "csrf" $.CSRFToken}}
+      <button class="btn btn-secondary btn-sm" type="submit">Try again</button>
+    </form>
+  </div>
+  <p class="small">{{if $v.ErrorMessage}}{{$v.ErrorMessage}}{{else}}Something went wrong while processing this video.{{end}}</p>
+  {{if eq $v.SourceType "url"}}<p class="small muted">You can also <a href="/videos/new">upload the video file directly</a>.</p>{{end}}
+</div>
+{{end}}
+
+<div class="video-layout">
+  <div>
+    <div class="player" id="player">
+      {{if $d.MediaURL}}
+        <video controls preload="metadata" playsinline src="{{$d.MediaURL}}" {{if $v.ThumbnailKey}}poster="/videos/{{$v.ID}}/thumbnail"{{end}}>
+          Your browser cannot play this video format. <a href="/videos/{{$v.ID}}/media">Download it</a> instead.
+        </video>
+      {{else if $d.EmbedURL}}
+        <iframe src="{{$d.EmbedURL}}" title="{{$v.Title}}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen
+          referrerpolicy="strict-origin-when-cross-origin"
+          data-embed-kind="{{$d.EmbedKind}}" data-embed-base="{{$d.EmbedBase}}"></iframe>
+      {{else}}
+        <div class="player-placeholder">{{template "icon-film"}}<p>{{if eq $v.Status "failed"}}No playable video is available.{{else}}The player will appear once the video is available.{{end}}</p></div>
+      {{end}}
+    </div>
+    <div class="video-meta">
+      {{if gt $v.DurationSeconds 0.0}}<span>Duration {{duration $v.DurationSeconds}}</span>{{end}}
+      {{if $v.Width}}<span>{{$v.Width}}×{{$v.Height}}</span>{{end}}
+      {{if $v.SizeBytes}}<span>{{bytes $v.SizeBytes}}</span>{{end}}
+      <span>Added {{date $v.CreatedAt}}</span>
+      {{if $v.SourceURL}}<span><a href="{{$v.SourceURL}}" rel="noopener noreferrer nofollow" target="_blank">Source link</a></span>{{end}}
+      {{with $d.Transcript}}<span>Transcript: {{if eq .Source "captions"}}captions{{else}}speech-to-text{{end}} · {{.WordCount}} words</span>{{end}}
+    </div>
+    {{if $v.Description}}<p class="small muted">{{$v.Description}}</p>{{end}}
+
+    {{if or $d.Summary $d.Transcript}}
+    <nav class="section-nav" aria-label="Sections">
+      {{if $d.Summary}}<a href="#summary">Summary</a><a href="#concepts">Concepts</a>{{end}}
+      {{if $d.Transcript}}<a href="#transcript">Transcript</a>{{end}}
+      <a href="#quizzes">Quizzes</a>
+    </nav>
+    {{end}}
+
+    {{with $d.Summary}}
+    <section class="card" id="summary" aria-labelledby="summary-h">
+      <div class="card-header">
+        <h2 id="summary-h">Summary</h2>
+        <div class="row">
+          <button type="button" class="btn btn-secondary btn-sm js-only" data-copy-target="summary-text">Copy</button>
+          <a class="btn btn-secondary btn-sm" href="/videos/{{$v.ID}}/summary.md">{{template "icon-download"}} Download</a>
+        </div>
+      </div>
+      <textarea id="summary-text" class="hidden" readonly aria-hidden="true">{{$d.SummaryText}}</textarea>
+      <div class="prose">
+        <h3>Overview</h3>
+        <p>{{.Overview}}</p>
+        {{range $d.DetailedBlocks}}
+          {{if .Heading}}<h3>{{.Heading}}</h3>{{end}}
+          {{range .Paragraphs}}<p>{{.}}</p>{{end}}
+        {{end}}
+        {{if .KeyTakeaways}}
+        <h3>Key takeaways</h3>
+        <ul class="takeaways">{{range .KeyTakeaways}}<li>{{.}}</li>{{end}}</ul>
+        {{end}}
+      </div>
+    </section>
+
+    <section class="card" id="concepts" aria-labelledby="concepts-h">
+      <div class="card-header"><h2 id="concepts-h">Important concepts</h2></div>
+      {{if .Concepts}}
+      <div class="concepts">
+        {{range .Concepts}}
+        <div class="concept"><div class="term">{{.Term}} <span class="cat">{{.Category}}</span></div><p>{{.Definition}}</p></div>
+        {{end}}
+      </div>
+      {{else}}<p class="muted small">No specific concepts were identified in this video.</p>{{end}}
+    </section>
+
+    {{if .LearningNotes}}
+    <section class="card" aria-labelledby="notes-h">
+      <div class="card-header"><h2 id="notes-h">Additional learning notes</h2></div>
+      {{range .LearningNotes}}
+      <div class="note {{if .IsExternal}}external{{end}}">
+        {{if .IsExternal}}<span class="tag">Additional context · not stated in the video</span>{{end}}
+        {{.Note}}
+      </div>
+      {{end}}
+    </section>
+    {{end}}
+    {{else}}
+      {{if eq $v.SummaryStatus "processing"}}
+      <section class="card"><div class="row"><span class="spinner"></span><span>Writing the summary…</span></div></section>
+      {{end}}
+    {{end}}
+
+    {{with $d.Transcript}}
+    <section class="card" id="transcript" aria-labelledby="transcript-h">
+      <div class="card-header">
+        <h2 id="transcript-h">Transcript</h2>
+        <div class="row">
+          <button type="button" class="btn btn-secondary btn-sm js-only" data-copy-url="/videos/{{$v.ID}}/transcript.txt">Copy</button>
+          <a class="btn btn-secondary btn-sm" href="/videos/{{$v.ID}}/transcript.txt">{{template "icon-download"}} Download</a>
+        </div>
+      </div>
+      <form class="toolbar" method="get" action="/videos/{{$v.ID}}#transcript" role="search">
+        <div class="search">
+          {{template "icon-search"}}
+          <label class="sr-only" for="tq">Search transcript</label>
+          <input class="input" id="tq" type="search" name="tq" value="{{$d.SegQuery}}" placeholder="Search within the transcript">
+        </div>
+        <button class="btn btn-secondary" type="submit">Search</button>
+        {{if $d.SegQuery}}<a class="btn btn-ghost" href="/videos/{{$v.ID}}#transcript">Clear</a>{{end}}
+      </form>
+      {{if $d.SegQuery}}<p class="small muted">{{$d.SegTotal}} matching segment{{if ne $d.SegTotal 1}}s{{end}} for “{{$d.SegQuery}}”.</p>{{end}}
+      {{if $d.Segments}}
+      <div class="transcript">
+        {{range $d.Segments}}
+        <div class="seg {{if not $timed}}no-ts{{end}}" {{if $timed}}data-start="{{.Start}}" data-end="{{.End}}"{{end}}>
+          {{if $timed}}{{template "ts-link" .Start}}{{end}}
+          <span>{{.Text}}</span>
+        </div>
+        {{end}}
+      </div>
+      {{if gt $d.SegPages 1}}
+      <nav class="pagination" aria-label="Transcript pages">
+        {{if gt $d.SegPage 1}}<a class="btn btn-secondary btn-sm" href="{{$d.SegPrevURL}}">← Earlier</a>{{end}}
+        <span class="muted">Part {{$d.SegPage}} of {{$d.SegPages}}</span>
+        {{if lt $d.SegPage $d.SegPages}}<a class="btn btn-secondary btn-sm" href="{{$d.SegNextURL}}">Later →</a>{{end}}
+      </nav>
+      {{end}}
+      {{else}}<p class="muted">No segments match your search.</p>{{end}}
+    </section>
+    {{end}}
+  </div>
+
+  <aside class="aside-sticky">
+    {{with $d.Summary}}{{if .Sections}}
+    <section class="card" aria-labelledby="topics-h">
+      <div class="card-header"><h2 id="topics-h">Topic breakdown</h2></div>
+      <ol class="topics">
+        {{range .Sections}}
+        <li class="topic">
+          {{if and $timed .Start}}{{template "ts-link" (deref .Start)}}{{else}}<span class="ts disabled">{{add .Position 1}}</span>{{end}}
+          <span class="t-title">{{.Title}}</span>
+          {{if .Content}}<span class="t-body">{{.Content}}</span>{{end}}
+        </li>
+        {{end}}
+      </ol>
+    </section>
+    {{end}}{{end}}
+
+    <section class="card" id="quizzes" aria-labelledby="quizzes-h">
+      <div class="card-header"><h2 id="quizzes-h">Quizzes</h2></div>
+      {{if eq $v.QuizStatus "processing"}}
+        <div class="progress-panel" {{if eq $v.Status "ready"}}data-poll-url="/videos/{{$v.ID}}/status" data-initial="{{$v.Status}}/{{$v.SummaryStatus}}/{{$v.QuizStatus}}"{{end}} aria-live="polite">
+          <div class="row"><span class="spinner"></span><span data-stage>Generating quiz…</span></div>
+          <progress max="100" value="10"></progress>
+        </div>
+      {{else if and (eq $v.QuizStatus "failed") $d.QuizJob}}
+        {{if eq $d.QuizJob.Status "failed"}}<div class="alert alert-error small">{{template "icon-alert"}}<div class="grow">{{$d.QuizJob.ErrorMessage}}</div></div>{{end}}
+      {{else if and (eq $v.QuizStatus "failed") (not $d.Quizzes)}}
+        <div class="alert alert-warning small">{{template "icon-info"}}<div class="grow">The automatic quiz could not be generated. You can try generating one below.</div></div>
+      {{end}}
+
+      {{if $d.Quizzes}}
+      <ul class="list">
+        {{range $d.Quizzes}}
+        <li class="list-item">
+          <div class="grow">
+            <a class="title" href="/quizzes/{{.ID}}">{{.Title}}</a>
+            <span class="small muted">{{.QuestionCount}} question{{if ne .QuestionCount 1}}s{{end}} · {{ago .CreatedAt}}</span>
+          </div>
+          <span class="badge plain badge-{{.Difficulty}}">{{title .Difficulty}}</span>
+        </li>
+        {{end}}
+      </ul>
+      {{else if ne $v.QuizStatus "processing"}}
+      <p class="small muted">No quizzes yet.</p>
+      {{end}}
+
+      {{if eq $v.SummaryStatus "ready"}}
+      <details {{if not $d.Quizzes}}open{{end}}>
+        <summary>Generate a new quiz</summary>
+        <form class="form" method="post" action="/videos/{{$v.ID}}/quizzes" data-once>
+          {{template "csrf" $.CSRFToken}}
+          <div class="form-row">
+            <div class="field">
+              <label for="count">Questions</label>
+              <input class="input" id="count" name="count" type="number" min="1" max="30" value="8" required>
+            </div>
+            <div class="field">
+              <label for="difficulty">Difficulty</label>
+              <select class="input" id="difficulty" name="difficulty">
+                {{range $d.Difficulties}}<option value="{{.}}" {{if eq . "medium"}}selected{{end}}>{{title .}}</option>{{end}}
+              </select>
+            </div>
+          </div>
+          <fieldset class="field">
+            <legend class="label">Question types</legend>
+            <div class="checks">
+              {{range $d.QuestionTypes}}<label class="check"><input type="checkbox" name="types" value="{{.}}" checked> {{typeLabel .}}</label>{{end}}
+            </div>
+          </fieldset>
+          {{with $d.Summary}}{{if .Sections}}
+          <div class="field">
+            <label for="section">Coverage</label>
+            <select class="input" id="section" name="section">
+              <option value="full">Entire video</option>
+              {{range .Sections}}<option value="{{.Position}}">{{if and $timed .Start}}{{clock (deref .Start)}} · {{end}}{{.Title}}</option>{{end}}
+            </select>
+          </div>
+          {{end}}{{end}}
+          <button class="btn btn-block" type="submit" {{if eq $v.QuizStatus "processing"}}disabled{{end}}>{{template "icon-spark"}} Generate quiz</button>
+        </form>
+      </details>
+      {{end}}
+    </section>
+  </aside>
+</div>
+{{end}}

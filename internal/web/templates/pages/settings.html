@@ -1,0 +1,75 @@
+{{template "app" .}}
+{{define "content"}}
+<div class="page-header">
+  <div>
+    <h1>Settings</h1>
+    <p>Manage your profile, password and account.</p>
+  </div>
+</div>
+
+<section class="card" aria-labelledby="profile-h">
+  <div class="card-header"><h2 id="profile-h">Profile</h2></div>
+  <form class="form" method="post" action="/settings/profile" data-once novalidate>
+    {{template "csrf" .CSRFToken}}
+    <div class="form-row">
+      <div class="field {{if .Errors.name}}has-error{{end}}">
+        <label for="name">Name</label>
+        <input class="input" id="name" name="name" required maxlength="80" autocomplete="name" value="{{.Form.Get "name"}}">
+        {{template "field-error" .Errors.name}}
+      </div>
+      <div class="field {{if .Errors.email}}has-error{{end}}">
+        <label for="email">Email</label>
+        <input class="input" id="email" name="email" type="email" required autocomplete="email" value="{{.Form.Get "email"}}">
+        {{template "field-error" .Errors.email}}
+      </div>
+    </div>
+    <div><button class="btn" type="submit">Save profile</button></div>
+  </form>
+</section>
+
+<section class="card" aria-labelledby="password-h">
+  <div class="card-header"><h2 id="password-h">Change password</h2></div>
+  <form class="form" method="post" action="/settings/password" data-once novalidate>
+    {{template "csrf" .CSRFToken}}
+    <div class="field {{if .Errors.current_password}}has-error{{end}}">
+      <label for="current_password">Current password</label>
+      <input class="input" id="current_password" name="current_password" type="password" autocomplete="current-password" required>
+      {{template "field-error" .Errors.current_password}}
+    </div>
+    <div class="form-row">
+      <div class="field {{if .Errors.new_password}}has-error{{end}}">
+        <label for="new_password">New password</label>
+        <input class="input" id="new_password" name="new_password" type="password" autocomplete="new-password" required minlength="10">
+        <span class="hint">At least 10 characters. Other devices will be signed out.</span>
+        {{template "field-error" .Errors.new_password}}
+      </div>
+      <div class="field {{if .Errors.confirm}}has-error{{end}}">
+        <label for="confirm">Confirm new password</label>
+        <input class="input" id="confirm" name="confirm" type="password" autocomplete="new-password" required>
+        {{template "field-error" .Errors.confirm}}
+      </div>
+    </div>
+    <div><button class="btn" type="submit">Update password</button></div>
+  </form>
+</section>
+
+<section class="card" aria-labelledby="appearance-h">
+  <div class="card-header"><h2 id="appearance-h">Appearance</h2></div>
+  <p class="muted small">Lumen follows your system's light or dark preference. You can override it on this device.</p>
+  <button type="button" class="btn btn-secondary js-only" data-theme-toggle>{{template "icon-moon"}} Toggle light / dark</button>
+</section>
+
+<section class="card danger-zone" aria-labelledby="danger-h">
+  <div class="card-header"><h2 id="danger-h">Delete account</h2></div>
+  <p class="muted small">Permanently deletes your account, all uploaded videos, transcripts, summaries, quizzes and results.</p>
+  <form class="form" method="post" action="/settings/delete" data-confirm="Permanently delete your account and all of its data? This cannot be undone.">
+    {{template "csrf" .CSRFToken}}
+    <div class="field {{if .Errors.delete_password}}has-error{{end}}">
+      <label for="delete_password">Confirm with your password</label>
+      <input class="input" id="delete_password" name="password" type="password" autocomplete="current-password" required>
+      {{template "field-error" .Errors.delete_password}}
+    </div>
+    <div><button class="btn btn-danger" type="submit">Delete my account</button></div>
+  </form>
+</section>
+{{end}}

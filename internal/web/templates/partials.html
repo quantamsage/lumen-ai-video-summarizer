@@ -1,0 +1,67 @@
+{{define "flash"}}{{with .Flash}}
+<div class="alert alert-{{.Kind}}" role="{{if eq .Kind "error"}}alert{{else}}status{{end}}">
+  {{if eq .Kind "success"}}{{template "icon-check"}}{{else if eq .Kind "error"}}{{template "icon-alert"}}{{else}}{{template "icon-info"}}{{end}}
+  <div class="grow">{{.Message}}</div>
+</div>
+{{end}}{{end}}
+
+{{define "csrf"}}<input type="hidden" name="csrf_token" value="{{.}}">{{end}}
+
+{{define "field-error"}}{{if .}}<span class="error-text" role="alert">{{.}}</span>{{end}}{{end}}
+
+{{define "status-badge"}}<span class="badge badge-{{.}}">{{statusLabel .}}</span>{{end}}
+
+{{define "video-card"}}
+<a class="video-card" href="/videos/{{.ID}}">
+  <div class="thumb">
+    {{if .ThumbnailKey}}<img src="/videos/{{.ID}}/thumbnail" alt="" loading="lazy">
+    {{else if .ThumbnailURL}}<img src="{{.ThumbnailURL}}" alt="" loading="lazy" referrerpolicy="no-referrer">
+    {{else}}{{template "icon-film"}}{{end}}
+    {{if gt .DurationSeconds 0.0}}<span class="duration">{{duration .DurationSeconds}}</span>{{end}}
+  </div>
+  <div class="body">
+    <div class="title">{{.Title}}</div>
+    {{if .Description}}<div class="desc">{{.Description}}</div>{{end}}
+    <div class="status-row">
+      {{template "status-badge" .Status}}
+      {{if eq .Status "ready" "processing"}}
+        <span class="badge badge-{{.SummaryStatus}}">Summary: {{statusLabel .SummaryStatus}}</span>
+        <span class="badge badge-{{.QuizStatus}}">Quiz: {{statusLabel .QuizStatus}}</span>
+      {{end}}
+    </div>
+    <div class="meta">Added {{ago .CreatedAt}}{{if eq .SourceType "url"}} · from URL{{end}}</div>
+  </div>
+</a>
+{{end}}
+
+{{define "mini-thumb"}}
+<span class="mini-thumb" aria-hidden="true">
+  {{if .ThumbnailKey}}<img src="/videos/{{.ID}}/thumbnail" alt="" loading="lazy">
+  {{else if .ThumbnailURL}}<img src="{{.ThumbnailURL}}" alt="" loading="lazy" referrerpolicy="no-referrer">
+  {{else}}{{template "icon-film"}}{{end}}
+</span>
+{{end}}
+
+{{define "ts-link"}}<a class="ts" href="?t={{printf "%.0f" .}}#player" data-seek="{{.}}">{{clock .}}</a>{{end}}
+
+{{/* ---------------------------------------------------------------- icons */}}
+{{define "logo"}}<span class="brand-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></span>{{end}}
+{{define "icon-home"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>{{end}}
+{{define "icon-library"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="m10 8.5 4.5 2.5-4.5 2.5z"/><path d="M7 21h10"/></svg>{{end}}
+{{define "icon-plus"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>{{end}}
+{{define "icon-chart"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>{{end}}
+{{define "icon-settings"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>{{end}}
+{{define "icon-moon"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>{{end}}
+{{define "icon-logout"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>{{end}}
+{{define "icon-menu"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>{{end}}
+{{define "icon-film"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>{{end}}
+{{define "icon-upload"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>{{end}}
+{{define "icon-link"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>{{end}}
+{{define "icon-search"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>{{end}}
+{{define "icon-check"}}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>{{end}}
+{{define "icon-alert"}}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>{{end}}
+{{define "icon-info"}}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>{{end}}
+{{define "icon-quiz"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg>{{end}}
+{{define "icon-book"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>{{end}}
+{{define "icon-spark"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/></svg>{{end}}
+{{define "icon-download"}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>{{end}}

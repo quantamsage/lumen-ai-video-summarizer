@@ -1,0 +1,21 @@
+{{template "auth" .}}
+{{define "content"}}
+<h1>Reset your password</h1>
+{{if .Data.EmailEnabled}}
+<p class="sub">Enter your account email and we'll send you a link to choose a new password.</p>
+<form class="form" method="post" action="/forgot-password" data-once>
+  {{template "csrf" .CSRFToken}}
+  <div class="field">
+    <label for="email">Email</label>
+    <input class="input" id="email" name="email" type="email" autocomplete="email" required autofocus>
+  </div>
+  <button class="btn btn-block" type="submit">Send reset link</button>
+</form>
+{{else}}
+<div class="alert alert-warning" role="status">{{template "icon-info"}}<div class="grow">
+  Password reset emails are not configured on this server. Please contact the administrator,
+  who can generate a reset link with <code>server reset-link &lt;email&gt;</code>.
+</div></div>
+{{end}}
+{{end}}
+{{define "auth-footer"}}<p class="auth-footer"><a href="/login">Back to sign in</a></p>{{end}}

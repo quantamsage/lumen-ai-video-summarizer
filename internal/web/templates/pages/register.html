@@ -1,0 +1,31 @@
+{{template "auth" .}}
+{{define "content"}}
+<h1>Create your account</h1>
+<p class="sub">Turn educational videos into summaries and quizzes.</p>
+<form class="form" method="post" action="/register" data-once novalidate>
+  {{template "csrf" .CSRFToken}}
+  <div class="field {{if .Errors.name}}has-error{{end}}">
+    <label for="name">Name</label>
+    <input class="input" id="name" name="name" autocomplete="name" required maxlength="80" value="{{.Form.Get "name"}}" autofocus>
+    {{template "field-error" .Errors.name}}
+  </div>
+  <div class="field {{if .Errors.email}}has-error{{end}}">
+    <label for="email">Email</label>
+    <input class="input" id="email" name="email" type="email" autocomplete="email" required value="{{.Form.Get "email"}}">
+    {{template "field-error" .Errors.email}}
+  </div>
+  <div class="field {{if .Errors.password}}has-error{{end}}">
+    <label for="password">Password</label>
+    <input class="input" id="password" name="password" type="password" autocomplete="new-password" required minlength="10">
+    <span class="hint">At least 10 characters.</span>
+    {{template "field-error" .Errors.password}}
+  </div>
+  <div class="field {{if .Errors.confirm}}has-error{{end}}">
+    <label for="confirm">Confirm password</label>
+    <input class="input" id="confirm" name="confirm" type="password" autocomplete="new-password" required>
+    {{template "field-error" .Errors.confirm}}
+  </div>
+  <button class="btn btn-block" type="submit">Create account</button>
+</form>
+{{end}}
+{{define "auth-footer"}}<p class="auth-footer">Already have an account? <a href="/login">Sign in</a></p>{{end}}

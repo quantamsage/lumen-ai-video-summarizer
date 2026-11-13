@@ -1,0 +1,87 @@
+{{template "app" .}}
+{{define "content"}}
+{{$url := eq (.Form.Get "mode") "url"}}
+<div class="page-header">
+  <div>
+    <div class="breadcrumb"><a href="/videos">Library</a> / Add video</div>
+    <h1>Add a video</h1>
+    <p>Processing runs in the background, so you can leave the page once your video is added.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="tabs" role="tablist" data-tabs>
+    <a href="/videos/new" role="tab" data-tab="panel-upload" aria-selected="{{if $url}}false{{else}}true{{end}}">Upload a file</a>
+    <a href="/videos/new?mode=url" role="tab" data-tab="panel-url" aria-selected="{{if $url}}true{{else}}false{{end}}">From a URL</a>
+  </div>
+
+  {{with .Errors.form}}<div class="alert alert-error" role="alert">{{template "icon-alert"}}<div class="grow">{{.}}</div></div>{{end}}
+
+  <section id="panel-upload" role="tabpanel" class="{{if $url}}hidden{{end}}">
+    <form class="form" method="post" action="/videos/upload" enctype="multipart/form-data" data-upload data-max-bytes="{{.Data.MaxBytes}}">
+      {{template "csrf" .CSRFToken}}
+      <div class="field">
+        <label class="dropzone" data-dropzone for="video">
+          {{template "icon-upload"}}
+          <strong>Drop a video here or click to browse</strong>
+          <span class="hint">MP4, MOV, WebM, MKV, AVI, OGV or MPEG, up to {{.Data.MaxUploadMB}} MB</span>
+          <span class="file-picked" data-file-label></span>
+          <input id="video" name="video" type="file" accept="{{.Data.Accept}},video/*" required>
+        </label>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label for="up-title">Title <span class="muted">(optional)</span></label>
+          <input class="input" id="up-title" name="title" maxlength="200" placeholder="Defaults to the file name" value="{{.Form.Get "title"}}">
+        </div>
+        <div class="field">
+          <label for="up-captions">Caption file <span class="muted">(optional)</span></label>
+          <input class="input" id="up-captions" name="captions" type="file" accept=".vtt,.srt">
+          <span class="hint">WebVTT or SRT. Used instead of speech-to-text when provided.</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="up-desc">Description <span class="muted">(optional)</span></label>
+        <textarea class="input" id="up-desc" name="description" maxlength="5000">{{.Form.Get "description"}}</textarea>
+      </div>
+      <div class="alert alert-error hidden" data-upload-error role="alert"></div>
+      <div class="progress-panel hidden" data-upload-progress aria-live="polite">
+        <div class="progress-meta"><span data-upload-status>Starting upload…</span><span data-upload-percent>0%</span></div>
+        <progress max="100" value="0">0%</progress>
+        <div><button type="button" class="btn btn-ghost btn-sm" data-upload-cancel>Cancel upload</button></div>
+      </div>
+      <div><button class="btn" type="submit">{{template "icon-upload"}} Upload and process</button></div>
+    </form>
+  </section>
+
+  <section id="panel-url" role="tabpanel" class="{{if not $url}}hidden{{end}}">
+    <div class="alert alert-info">{{template "icon-info"}}<div class="grow">
+      <p><strong>Direct video links</strong> (for example <code>https://example.com/lecture.mp4</code>) are downloaded and processed fully.</p>
+      <p><strong>YouTube and Vimeo</strong> don't allow third-party apps to download videos or transcripts. Attach the video's caption file (owners can export it from YouTube Studio or Vimeo) and it will be used with the embedded player. Otherwise, upload the video file directly.</p>
+    </div></div>
+    <form class="form" method="post" action="/videos/url" enctype="multipart/form-data" data-once>
+      {{template "csrf" .CSRFToken}}
+      <div class="field">
+        <label for="url">Video URL</label>
+        <input class="input" id="url" name="url" type="url" required placeholder="https://" value="{{.Form.Get "url"}}">
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label for="url-title">Title <span class="muted">(optional)</span></label>
+          <input class="input" id="url-title" name="title" maxlength="200" value="{{.Form.Get "title"}}">
+        </div>
+        <div class="field">
+          <label for="url-captions">Caption file</label>
+          <input class="input" id="url-captions" name="captions" type="file" accept=".vtt,.srt">
+          <span class="hint">Required for YouTube and Vimeo links.</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="url-desc">Description <span class="muted">(optional)</span></label>
+        <textarea class="input" id="url-desc" name="description" maxlength="5000">{{.Form.Get "description"}}</textarea>
+      </div>
+      <div><button class="btn" type="submit">{{template "icon-link"}} Import video</button></div>
+    </form>
+  </section>
+</div>
+{{end}}

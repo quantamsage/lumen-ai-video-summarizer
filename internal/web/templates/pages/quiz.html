@@ -1,0 +1,76 @@
+{{template "app" .}}
+{{define "content"}}
+{{$q := .Data.Quiz}}
+{{$v := .Data.Video}}
+<div class="quiz-shell">
+  <div class="page-header">
+    <div>
+      <div class="breadcrumb"><a href="/videos">Library</a> / <a href="/videos/{{$v.ID}}">{{$v.Title}}</a> / Quiz</div>
+      <h1>{{$q.Title}}</h1>
+      <div class="row small muted">
+        <span class="badge plain badge-{{$q.Difficulty}}">{{title $q.Difficulty}}</span>
+        <span>{{$q.QuestionCount}} question{{if ne $q.QuestionCount 1}}s{{end}}</span>
+        <span>Created {{ago $q.CreatedAt}}</span>
+      </div>
+    </div>
+  </div>
+
+  {{if $q.ShortfallReason}}
+  <div class="alert alert-info">{{template "icon-info"}}<div class="grow">
+    <strong>{{$q.QuestionCount}} of {{$q.RequestedCount}} requested questions were generated.</strong> {{$q.ShortfallReason}}
+  </div></div>
+  {{end}}
+
+  {{if .Data.History}}
+  <div class="alert alert-info">{{template "icon-chart"}}<div class="grow">
+    You've taken this quiz {{len .Data.History}} time{{if ne (len .Data.History) 1}}s{{end}}.
+    Last score: <a href="/attempts/{{(index .Data.History 0).ID}}">{{pct (index .Data.History 0).Score}}</a>.
+  </div></div>
+  {{end}}
+
+  <form method="post" action="/quizzes/{{$q.ID}}/submit" data-quiz>
+    {{template "csrf" .CSRFToken}}
+    <input type="hidden" name="started_at" value="{{.Data.StartedAt}}">
+
+    <div class="quiz-progress js-only">
+      <div class="progress-meta"><span data-quiz-counter></span></div>
+      <progress max="100" value="0" data-quiz-progress></progress>
+    </div>
+
+    {{range $i, $qq := $q.Questions}}
+    <fieldset class="question" id="q{{$qq.ID}}">
+      <div class="q-head">
+        <span>Question {{add $i 1}} of {{len $q.Questions}}</span>
+        <span>{{typeLabel $qq.Type}}</span>
+      </div>
+      <legend class="q-prompt">{{$qq.Prompt}}</legend>
+      {{if eq $qq.Type "short_answer"}}
+        <label class="sr-only" for="a{{$qq.ID}}">Your answer</label>
+        <input class="input" id="a{{$qq.ID}}" type="text" name="q_{{$qq.ID}}_text" maxlength="500" autocomplete="off" placeholder="Type a short answer">
+      {{else}}
+        {{if eq $qq.Type "multiple_answer"}}<p class="hint">Select all that apply.</p>{{end}}
+        <div class="options">
+          {{range $qq.Options}}
+          <label class="option">
+            <input type="{{if eq $qq.Type "multiple_answer"}}checkbox{{else}}radio{{end}}" name="q_{{$qq.ID}}" value="{{.ID}}">
+            <span>{{.Text}}</span>
+          </label>
+          {{end}}
+        </div>
+      {{end}}
+    </fieldset>
+    {{end}}
+
+    <div class="quiz-nav js-only">
+      <button type="button" class="btn btn-secondary" data-quiz-prev>← Previous</button>
+      <div class="dots" data-quiz-dots aria-label="Questions"></div>
+      <button type="button" class="btn" data-quiz-next>Next →</button>
+      <button type="submit" class="btn hidden" data-quiz-submit>Submit answers</button>
+    </div>
+    <div class="quiz-nav no-js-only">
+      <span></span>
+      <button type="submit" class="btn">Submit answers</button>
+    </div>
+  </form>
+</div>
+{{end}}

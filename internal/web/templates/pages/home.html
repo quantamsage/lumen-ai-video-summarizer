@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>{{template "head" .}}</head>
+<body>
+<main class="hero" id="content">
+  <nav class="hero-nav">
+    <a class="brand" href="/">{{template "logo"}} Lumen</a>
+    <div class="row">
+      <a class="btn btn-ghost" href="/login">Sign in</a>
+      <a class="btn" href="/register">Get started</a>
+    </div>
+  </nav>
+  {{template "flash" .}}
+  <h1>Turn any educational video into notes and quizzes you can actually learn from.</h1>
+  <p class="lead">Upload a lecture, talk or tutorial. Lumen transcribes it, writes a structured summary with key concepts and clickable timestamps, and builds quizzes grounded in what was actually said.</p>
+  <div class="row">
+    <a class="btn" href="/register">Create a free account</a>
+    <a class="btn btn-secondary" href="/login">I already have an account</a>
+  </div>
+  <div class="features">
+    <div class="card feature">{{template "icon-upload"}}<h3>Upload or link</h3><p>Upload video files directly, or import direct video links and captioned YouTube or Vimeo videos.</p></div>
+    <div class="card feature">{{template "icon-book"}}<h3>Coherent summaries</h3><p>Overview, detailed notes, key takeaways, concepts and a timestamped topic breakdown.</p></div>
+    <div class="card feature">{{template "icon-quiz"}}<h3>Grounded quizzes</h3><p>Multiple choice, multi-answer, true/false and short answer questions, verified against the transcript.</p></div>
+    <div class="card feature">{{template "icon-chart"}}<h3>Track progress</h3><p>Review explanations, revisit the exact moment in the video, and follow your scores over time.</p></div>
+  </div>
+</main>
+</body>
+</html>

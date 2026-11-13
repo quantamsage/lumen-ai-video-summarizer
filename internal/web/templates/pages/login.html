@@ -1,0 +1,20 @@
+{{template "auth" .}}
+{{define "content"}}
+<h1>Welcome back</h1>
+<p class="sub">Sign in to continue learning.</p>
+{{with .Errors.form}}<div class="alert alert-error" role="alert">{{template "icon-alert"}}<div class="grow">{{.}}</div></div>{{end}}
+<form class="form" method="post" action="/login" data-once>
+  {{template "csrf" .CSRFToken}}
+  <input type="hidden" name="next" value="{{.Form.Get "next"}}">
+  <div class="field">
+    <label for="email">Email</label>
+    <input class="input" id="email" name="email" type="email" autocomplete="email" required value="{{.Form.Get "email"}}" autofocus>
+  </div>
+  <div class="field">
+    <div class="row-between"><label for="password">Password</label><a class="small" href="/forgot-password">Forgot password?</a></div>
+    <input class="input" id="password" name="password" type="password" autocomplete="current-password" required>
+  </div>
+  <button class="btn btn-block" type="submit">Sign in</button>
+</form>
+{{end}}
+{{define "auth-footer"}}<p class="auth-footer">New here? <a href="/register">Create an account</a></p>{{end}}

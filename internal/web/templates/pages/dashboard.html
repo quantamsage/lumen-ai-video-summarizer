@@ -1,0 +1,69 @@
+{{template "app" .}}
+{{define "content"}}
+{{$s := .Data.Stats}}
+<div class="page-header">
+  <div>
+    <h1>Welcome back, {{.User.DisplayName}}</h1>
+    <p>Here's an overview of your learning.</p>
+  </div>
+  <a class="btn" href="/videos/new">{{template "icon-plus"}} Add video</a>
+</div>
+
+<section class="stats" aria-label="Learning statistics">
+  <div class="stat"><div class="stat-label">Videos added</div><div class="stat-value">{{$s.TotalVideos}}</div>
+    <div class="stat-sub">{{if $s.ProcessingCount}}{{$s.ProcessingCount}} processing{{else}}in your library{{end}}</div></div>
+  <div class="stat"><div class="stat-label">Processed</div><div class="stat-value">{{$s.ProcessedVideos}}</div><div class="stat-sub">ready to study</div></div>
+  <div class="stat"><div class="stat-label">Summaries</div><div class="stat-value">{{$s.Summaries}}</div><div class="stat-sub">generated</div></div>
+  <div class="stat"><div class="stat-label">Quizzes completed</div><div class="stat-value">{{$s.QuizzesTaken}}</div><div class="stat-sub">attempts</div></div>
+  <div class="stat"><div class="stat-label">Average score</div>
+    <div class="stat-value">{{if $s.QuizzesTaken}}{{pct $s.AverageScore}}{{else}}—{{end}}</div>
+    <div class="stat-sub">{{if $s.QuizzesTaken}}across all attempts{{else}}take a quiz to start{{end}}</div></div>
+</section>
+
+{{if not .Data.Recent}}
+<div class="card">
+  <div class="empty">
+    {{template "icon-film"}}
+    <h3>Your library is empty</h3>
+    <p>Add your first educational video. We'll transcribe it, summarize it and create a quiz for you.</p>
+    <a class="btn" href="/videos/new">{{template "icon-upload"}} Add your first video</a>
+  </div>
+</div>
+{{else}}
+<div class="video-layout">
+  <section class="card" aria-labelledby="recent-videos">
+    <div class="card-header"><h2 id="recent-videos">Recently added</h2><a class="small" href="/videos">View library →</a></div>
+    <ul class="list">
+      {{range .Data.Recent}}
+      <li class="list-item">
+        {{template "mini-thumb" .}}
+        <div class="grow">
+          <a class="title" href="/videos/{{.ID}}">{{.Title}}</a>
+          <span class="small muted">Added {{ago .CreatedAt}}{{if gt .DurationSeconds 0.0}} · {{duration .DurationSeconds}}{{end}}</span>
+        </div>
+        {{template "status-badge" .Status}}
+      </li>
+      {{end}}
+    </ul>
+  </section>
+  <section class="card" aria-labelledby="recent-quizzes">
+    <div class="card-header"><h2 id="recent-quizzes">Recent quizzes</h2>{{if .Data.Attempts}}<a class="small" href="/history">All results →</a>{{end}}</div>
+    {{if .Data.Attempts}}
+    <ul class="list">
+      {{range .Data.Attempts}}
+      <li class="list-item">
+        <div class="grow">
+          <a class="title" href="/attempts/{{.ID}}">{{.VideoTitle}}</a>
+          <span class="small muted">{{title .Difficulty}} · {{ago .CompletedAt}}</span>
+        </div>
+        <span class="score-pill score-{{scoreClass .Score}}">{{pct .Score}}</span>
+      </li>
+      {{end}}
+    </ul>
+    {{else}}
+    <p class="muted small">No quizzes taken yet. Open a processed video and start its quiz to test yourself.</p>
+    {{end}}
+  </section>
+</div>
+{{end}}
+{{end}}

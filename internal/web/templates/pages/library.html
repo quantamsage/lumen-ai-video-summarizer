@@ -1,0 +1,61 @@
+{{template "app" .}}
+{{define "content"}}
+<div class="page-header">
+  <div>
+    <h1>Video library</h1>
+    <p>{{.Data.Total}} video{{if ne .Data.Total 1}}s{{end}}{{if .Data.Filtered}} matching your filters{{end}}</p>
+  </div>
+  <a class="btn" href="/videos/new">{{template "icon-plus"}} Add video</a>
+</div>
+
+<form class="toolbar" method="get" action="/videos" role="search">
+  <div class="search">
+    {{template "icon-search"}}
+    <label class="sr-only" for="q">Search videos</label>
+    <input class="input" id="q" type="search" name="q" placeholder="Search titles and descriptions" value="{{.Form.Get "q"}}">
+  </div>
+  {{$st := .Form.Get "status"}}
+  <label class="sr-only" for="status">Status</label>
+  <select class="input" id="status" name="status">
+    <option value="">All statuses</option>
+    <option value="queued" {{if eq $st "queued"}}selected{{end}}>Queued</option>
+    <option value="processing" {{if eq $st "processing"}}selected{{end}}>Processing</option>
+    <option value="ready" {{if eq $st "ready"}}selected{{end}}>Ready</option>
+    <option value="failed" {{if eq $st "failed"}}selected{{end}}>Failed</option>
+  </select>
+  <label class="sr-only" for="sort">Sort</label>
+  <select class="input" id="sort" name="sort">
+    <option value="newest">Newest first</option>
+    <option value="oldest" {{if eq (.Form.Get "sort") "oldest"}}selected{{end}}>Oldest first</option>
+  </select>
+  <button class="btn btn-secondary" type="submit">Apply</button>
+  {{if .Data.Filtered}}<a class="btn btn-ghost" href="/videos">Clear</a>{{end}}
+</form>
+
+{{if .Data.Videos}}
+<div class="video-grid">
+  {{range .Data.Videos}}{{template "video-card" .}}{{end}}
+</div>
+{{if gt .Data.Pages 1}}
+<nav class="pagination" aria-label="Pagination">
+  {{if gt .Data.Page 1}}<a class="btn btn-secondary btn-sm" href="{{.Data.PrevURL}}">← Previous</a>{{end}}
+  <span class="muted">Page {{.Data.Page}} of {{.Data.Pages}}</span>
+  {{if lt .Data.Page .Data.Pages}}<a class="btn btn-secondary btn-sm" href="{{.Data.NextURL}}">Next →</a>{{end}}
+</nav>
+{{end}}
+{{else if .Data.Filtered}}
+<div class="card"><div class="empty">
+  {{template "icon-search"}}
+  <h3>No videos match</h3>
+  <p>Try a different search term or status filter.</p>
+  <a class="btn btn-secondary" href="/videos">Clear filters</a>
+</div></div>
+{{else}}
+<div class="card"><div class="empty">
+  {{template "icon-film"}}
+  <h3>No videos yet</h3>
+  <p>Upload a video file or import one from a URL to start building your library.</p>
+  <a class="btn" href="/videos/new">{{template "icon-upload"}} Add a video</a>
+</div></div>
+{{end}}
+{{end}}

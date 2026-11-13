@@ -1,0 +1,26 @@
+{{template "auth" .}}
+{{define "content"}}
+<h1>Choose a new password</h1>
+{{if .Data.Valid}}
+<form class="form" method="post" action="/reset-password" data-once novalidate>
+  {{template "csrf" .CSRFToken}}
+  <input type="hidden" name="token" value="{{.Form.Get "token"}}">
+  <div class="field {{if .Errors.password}}has-error{{end}}">
+    <label for="password">New password</label>
+    <input class="input" id="password" name="password" type="password" autocomplete="new-password" required minlength="10" autofocus>
+    <span class="hint">At least 10 characters.</span>
+    {{template "field-error" .Errors.password}}
+  </div>
+  <div class="field {{if .Errors.confirm}}has-error{{end}}">
+    <label for="confirm">Confirm new password</label>
+    <input class="input" id="confirm" name="confirm" type="password" autocomplete="new-password" required>
+    {{template "field-error" .Errors.confirm}}
+  </div>
+  <button class="btn btn-block" type="submit">Update password</button>
+</form>
+{{else}}
+<div class="alert alert-error" role="alert">{{template "icon-alert"}}<div class="grow">This reset link is invalid or has expired.</div></div>
+<a class="btn btn-block" href="/forgot-password">Request a new link</a>
+{{end}}
+{{end}}
+{{define "auth-footer"}}<p class="auth-footer"><a href="/login">Back to sign in</a></p>{{end}}
